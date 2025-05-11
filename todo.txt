@@ -1,0 +1,27 @@
+Регистрация:
+1) client get / -> host post redirect /login
+2.1) client has cookie 
+      => client post /cookie
+        => host post redirect /home
+2.2) no cookie
+      => wait for sign up/in
+        -> client get /login/register
+          -> 
+          ->
+
+
+
+uget/ => redirect /login
+scenario 1: user has cookie
+  get
+
+
+Database:
+  Users (name, login, passHash)
+  Bits (bool, owner)
+  UserHasBit (user, bit)
+
+  hasUser(login) -> id?
+  
+
+

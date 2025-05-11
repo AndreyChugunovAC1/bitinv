@@ -17,9 +17,9 @@ public class HomeController {
 
   @GetMapping("/")
   public String getHomePage(Model model) {
-    Integer value = database.getUserBit(0) ? 1 : 0;
+    // Integer value = database.getUserBit(0) ? 1 : 0;
 
-    model.addAttribute("value", value);
+    model.addAttribute("value", 0);
     model.addAttribute("name", "Invy");
     return "home";
   }
