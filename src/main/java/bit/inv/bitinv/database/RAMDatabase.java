@@ -1,12 +1,6 @@
 package bit.inv.bitinv.database;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalLong;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,45 +11,39 @@ import bit.inv.bitinv.database.entities.*;
 import jakarta.annotation.PostConstruct;
 
 @Component
-public class RAMDatabase implements Database {
-  private Set<User> users = new HashSet<>();
-  private Set<Bit> bits = new HashSet<>();
-  private Set<UserHasBit> userHasBits = new HashSet<>();
+public class RAMDatabase implements DatabaseDAO {
+  private Map<Long, UserData> users = new HashMap<>();
 
   @Autowired
   private BCryptPasswordEncoder passwordEncoder;
 
   @PostConstruct
-  private void init() {
-    addUser("Andrey", "a", true);
+  private void testInit() {
+    addUser("root", "123", false);
+    addUser("Ann", "a", true);
     addUser("Bob", "b", false);
-    addUser("George", "g", false);
+    addUser("Chr", "c", true);
+  }
+
+  private void addUser(String login, String pass, boolean value) {
+    updateUser(new UserData((long) users.size(), login, passwordEncoder.encode(pass), value));
   }
 
   @Override
-  public void addUser(String login, String pass, Boolean value) {
-    userHasBits.add(new UserHasBit((long) userHasBits.size(), (long) users.size(), (long) bits.size()));
-    bits.add(new Bit((long) bits.size(), value, (long) users.size()));
-    users.add(new User((long) users.size(), login, passwordEncoder.encode(pass)));
+  public void updateUser(UserData user) {
+    users.put((long) users.size(), user);
   }
 
   @Override
-  public User getUserByLogin(String login) {
-    return users.stream().filter(u -> u.login().equals(login)).findAny().orElse(null);
+  public UserData getUserDataByLogin(String login) {
+    return users.values().stream().filter(u -> u.login().equals(login)).findAny().orElse(null);
   }
 
   @Override
-  public List<Bit> getUserBits(long userId) {
-    return bits.stream().filter(b -> b.owner().equals(userId)).toList();
-  }
+  public void updateUserValueByLogin(String login, boolean newValue) {
+    UserData user = getUserDataByLogin(login);
+    UserData updatedUser = new UserData(user.id(), user.login(), user.passHash(), newValue);
 
-  /*
-   * public List<Bit> getUnownedUserBits(long userId) {
-   * var userSBits = getUserBits(userId);
-   * 
-   * return userHasBits.stream()
-   * .filter(uob -> uob.owner().equals(userId))
-   * .filter(uob -> userSBits.stream().allMatch(b -> !b.id().equals(uob.bitId())))
-   * }
-   */
+    updateUser(updatedUser);
+  }
 }

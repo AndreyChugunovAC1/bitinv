@@ -3,14 +3,76 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Simple Thymeleaf Example</title>
+  <title>BitInv</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    th,
+    td,
+    tr {
+      border: 2px solid black;
+      padding: 2px;
+      text-align: left;
+    }
+  </style>
+  <script>
+    setListener = (elemId, url, formDataProcessor, dataProcessor) => {
+      document.getElementById(elemId).addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+
+        formDataProcessor(formData);
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            alert(data.error);
+          } else {
+            dataProcessor(data);
+          }
+        } catch (err) {
+          console.error("Error:", err);
+          alert("An error occurred: " + err.message);
+        }
+      });
+    }
+  </script>
 </head>
 
 <body>
   <div>
-    <p>User: <span th:text="${name}">no_name</span></p>
-    <p>Value: <span th:text="${value}">no_name</span></p>
+    <table>
+      <tr>
+        <th>User:</th>
+        <td><span th:text="${name}">no_name</span></td>
+      </tr>
+      <tr>
+        <th>Value:</th>
+        <td><span id="valueHolder" th:text="${value}">no_name</span></td>
+      </tr>
+    </table>
+    <form id="valueChange">
+      <label>Enter new value:<br>
+        <input id="inputHolder" type="text" name="newValue" required>
+      </label>
+      <button type="submit">Enter</button>
+    </form>
   </div>
+  <script>
+    setListener("valueChange", "/home",
+      formData => { formData.append("token", localStorage.getItem("token")); },
+      data => {
+        document.getElementById("valueHolder").textContent = document.getElementById("inputHolder").textContent;
+      });
+  </script>
 </body>
 
 </html>

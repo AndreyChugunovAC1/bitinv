@@ -3,11 +3,39 @@
 
 <head>
   <title>Login</title>
+  <script>
+    setListener = (elemId, url, formDataProcessor, dataProcessor) => {
+      document.getElementById(elemId).addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+
+        formDataProcessor(formData);
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            alert(data.error);
+          } else {
+            dataProcessor(data);
+          }
+        } catch (err) {
+          console.error("Error:", err);
+          alert("An error occurred: " + err.message);
+        }
+      });
+    }
+  </script>
 </head>
 
 <body>
-  <h2 ></h2>
-  <form action="/login/auth" method="post">
+  <h2></h2>
+  <form id="invLogin" action="/login/auth" method="post">
     <label>Login:
       <input type="text" name="login" required>
     </label><br>
@@ -16,6 +44,12 @@
     </label><br>
     <button type="submit">Enter</button>
   </form>
+  <script>
+    setListener("invLogin", "/login/auth", () => { }, data => {
+      localStorage.setItem("token", data.token);
+      window.location.href = `/home?token=${data.token}`;
+    });
+  </script>
 </body>
 
 </html>
